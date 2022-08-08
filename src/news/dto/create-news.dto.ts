@@ -1,4 +1,12 @@
+import { IsArray, IsString, MinLength } from 'class-validator';
+
 export class CreateNewsDto {
-    title: string;
-    text: string;
+  @IsString()
+  title: string;
+
+  @IsString()
+  @MinLength(10)
+  text: string;
+
+  thumbnail: string;
 }

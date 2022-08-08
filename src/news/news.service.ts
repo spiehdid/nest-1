@@ -7,31 +7,7 @@ import { News } from './entities/news.entity';
 
 @Injectable()
 export class NewsService {
-  private news: News[] = [
-    {
-      id: 1,
-      author: 'andrey',
-      title: 'title',
-      text: 'text',
-      comments: [
-        {
-          id: 1,
-          author: 'andrey',
-          text: 'text',
-          date: '2022-08-04T17:59:30.132Z',
-        }
-      ],
-      date: '2022-08-04T17:57:30.132Z',
-    },
-    {
-      id: 2,
-      author: 'andrey',
-      title: 'title2',
-      text: 'text2',
-      comments: [],
-      date: '2022-08-04T17:57:30.132Z',
-    },
-  ];
+  private news: News[] = [];
 
   create(createNewsDto: CreateNewsDto) {
     const news: News = {
@@ -41,6 +17,7 @@ export class NewsService {
       text: createNewsDto.text,
       comments: [],
       date: new Date().toUTCString(),
+      thumbnail: createNewsDto.thumbnail,
     };
     this.news.push(news);
   }
