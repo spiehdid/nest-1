@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
-import { MulterModule } from '@nestjs/platform-express';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { NewsModule } from './news/news.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
-    NewsModule
+    NewsModule,
+    MailModule
   ],
   controllers: [AppController],
   providers: [AppService],

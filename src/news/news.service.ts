@@ -9,7 +9,7 @@ import { News } from './entities/news.entity';
 export class NewsService {
   private news: News[] = [];
 
-  create(createNewsDto: CreateNewsDto) {
+  async create(createNewsDto: CreateNewsDto) {
     const news: News = {
       id: this.news.length + 1,
       author: 'andrey',
@@ -20,6 +20,8 @@ export class NewsService {
       thumbnail: createNewsDto.thumbnail,
     };
     this.news.push(news);
+
+    return news;
   }
 
   createComment(createCommentDto: CreateCommentDto) {

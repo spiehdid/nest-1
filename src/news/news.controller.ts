@@ -8,6 +8,7 @@ import {
   Controller,
   UseInterceptors,
   UploadedFile,
+  Render,
 } from '@nestjs/common';
 // import { Express } from 'express'
 import { NewsService } from './news.service';
@@ -19,29 +20,43 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { TimeoutInterceptor } from 'src/interseptors/timeout/timeout.interceptor';
+import { MailService } from 'src/mail/mail.service';
 
 @Controller('news')
 export class NewsController {
-  constructor(private readonly newsService: NewsService) {}
+  constructor(
+    private readonly newsService: NewsService,
+    private readonly mailService: MailService,
+  ) {}
 
   @Post()
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: './uploads/thumbnails',
+        destination: './public/thumbnails',
         filename: (req, file, cb) => {
-          const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('')
-          cb(null, `${randomName}${extname(file.originalname)}`)
-        }
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          cb(null, `${randomName}${extname(file.originalname)}`);
+        },
       }),
     }),
   )
   @UseInterceptors(TimeoutInterceptor)
-  create(
+  async create(
     @UploadedFile() file: Express.Multer.File,
     @Body() createNewsDto: CreateNewsDto,
   ) {
-    return this.newsService.create({ ...createNewsDto, thumbnail: `thumbnails/${file.filename}` });
+    const news = await this.newsService.create({
+      ...createNewsDto,
+      thumbnail: `thumbnails/${file.filename}`,
+    });
+
+    await this.mailService.sendNewNewsForAdmins(['spiehdid6@mail.ru'], news);
+
+    return news;
   }
 
   // localhost:3000/news/comment
@@ -55,8 +70,9 @@ export class NewsController {
 
   @Get()
   @Public() // meta = { "type": "public" }
+  @Render('news-list')
   findAll() {
-    return this.newsService.findAll();
+    return { news: this.newsService.findAll() };
   }
 
   // localhost:3000/news/pop
