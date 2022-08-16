@@ -8,13 +8,10 @@ import {
   Controller,
   UseInterceptors,
   UploadedFile,
-  Render,
 } from '@nestjs/common';
-// import { Express } from 'express'
 import { NewsService } from './news.service';
 import { CreateNewsDto } from './dto/create-news.dto';
 import { UpdateNewsDto } from './dto/update-news.dto';
-import { CreateCommentDto } from './dto/create-comment.dto';
 import { Public } from 'src/dectorators/public.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -49,40 +46,17 @@ export class NewsController {
     @UploadedFile() file: Express.Multer.File,
     @Body() createNewsDto: CreateNewsDto,
   ) {
-    const news = await this.newsService.create({
+    return this.newsService.create({
       ...createNewsDto,
       thumbnail: `thumbnails/${file.filename}`,
     });
-
-    await this.mailService.sendNewNewsForAdmins(['spiehdid6@mail.ru'], news);
-
-    return news;
   }
-
-  // localhost:3000/news/comment
-
-  @Post('comment')
-  createComment(@Body() createCommentDto: CreateCommentDto) {
-    return this.newsService.createComment(createCommentDto);
-  }
-
-  // localhost:3000/news
 
   @Get()
-  @Public() // meta = { "type": "public" }
-  @Render('news-list')
+  @Public()
   findAll() {
-    return { news: this.newsService.findAll() };
-  }
-
-  // localhost:3000/news/pop
-
-  @Get('pop')
-  findPop() {
     return this.newsService.findAll();
   }
-
-  // localhost:3000/news/23423534363456345
 
   @Get(':id')
   findOne(@Param('id') id: string) {

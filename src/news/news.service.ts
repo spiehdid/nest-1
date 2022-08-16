@@ -1,55 +1,40 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateCommentDto } from 'src/news/dto/create-comment.dto';
-import { Comment } from 'src/news/entities/comment.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { News } from 'src/db/entities/news.entity';
+import { Repository } from 'typeorm';
 import { CreateNewsDto } from './dto/create-news.dto';
 import { UpdateNewsDto } from './dto/update-news.dto';
-import { News } from './entities/news.entity';
 
 @Injectable()
 export class NewsService {
-  private news: News[] = [];
+  constructor(
+    @InjectRepository(News) private readonly newsRepository: Repository<News>,
+  ) {}
 
   async create(createNewsDto: CreateNewsDto) {
-    const news: News = {
-      id: this.news.length + 1,
+    const news = {
       author: 'andrey',
       title: createNewsDto.title,
       text: createNewsDto.text,
-      comments: [],
       date: new Date().toUTCString(),
       thumbnail: createNewsDto.thumbnail,
     };
-    this.news.push(news);
 
-    return news;
-  }
-
-  createComment(createCommentDto: CreateCommentDto) {
-    const newsId = createCommentDto.newsId;
-    const news = this.findOne(newsId);
-
-    const comment: Comment = {
-      id: news.comments.length + 1,
-      author: 'andrey',
-      text: createCommentDto.text,
-      date: new Date().toUTCString(),
-    };
-
-    this.news[newsId - 1].comments.push(comment);
+    return this.newsRepository.save(news);
   }
 
   findAll() {
-    return this.news;
+    return this.newsRepository.find();
   }
 
-  findOne(id: number) {
-    const news = this.news.find((news) => news.id === id);
+  async findOne(id: number) {
+    const news = await this.newsRepository.findOneBy({ id });
 
     if (!news) {
       throw new NotFoundException();
     }
 
-    return news
+    return news;
   }
 
   update(id: number, updateNewsDto: UpdateNewsDto) {
